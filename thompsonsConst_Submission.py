@@ -1,4 +1,37 @@
 # David Gallagher
+# Shunting Yard Alg
+# www.oxfordmathcenter.com/drupal7/node/628
+
+def shunt(infix):
+
+    # need to add other operators here + ? and set precedence
+    priorityOps = {'*':50, '.':40, '|':30}
+
+    postFx = ""
+    stack = ""
+
+    for c in infix:
+        if c == '(':
+            stack = stack + c
+        elif c == ')':
+            while stack[-1] != '(':
+                postFx, stack = postFx + stack[-1], stack[:-1]
+            stack = stack[:-1]
+        elif c in priorityOps:
+            while stack and priorityOps.get(c, 0) <= priorityOps.get(stack[-1], 0):
+                postFx, stack = postFx + stack[-1], stack[:-1]
+            stack = stack + c
+        else:
+            postFx = stack + c
+
+    while stack:
+        postFx, stack = postFx + stack[-1], stack[:-1]
+
+    return postFx
+
+print(shunt("(a.b)|(c*d)"))
+
+
 # Thompsons Construction
 # https://swtch.com/~rsc/regexp/regexp1.html
 
@@ -87,3 +120,54 @@ def compile(pofix):
             nfaStack.append(new_nfa)
 
     return nfaStack.pop()
+
+#Returns the state or set of states which can be reached from a state by following 'E' arrows
+def followes(state):
+# Create a new set with only a state as a member
+    states = set()
+    set.add(state)
+
+    #Check if state has arrows labelled e leading out of it
+    if state.label is none:
+        #if there's edge 1 - follow
+        states |= followes(state.edge1)
+        #if edge 2 - follow
+        states |= followes(state.edge2)
+    
+    # return the set of states
+    return states
+
+
+""" Match compiles the infix regular expression to postfix and creates an NFA from it.
+    Sets up two empty sets of states both present and future states will be located here.
+    Present set is comprised of any state we land in after following e-arrows from the initial state.
+    We can now take a string and loop through it to find all states we can access from that character in the string.
+    Repeat for each character in the string.
+"""
+def match(infix, string):
+    # shunt and compile the regex..
+    pofix = shunt(infix)
+    nfa = compile(pofix)
+
+    # Present and future set of states
+    present = set()
+    future = set()
+
+    #Add initial state to the present set
+    present |- followes(nfa.initial)
+
+    #loop through each char in string s
+    for s in string:
+        #loop through the present set of states
+        for c in present:
+            #check if any are labelled 's'
+            if c.label == s:
+                future |= followes(c.edge1)
+        #Set present to future and reset future to empty
+        present = future
+        future = set()
+    
+    #check if accept state is in the current set of states
+    return (nfa.accept in present)
+
+
