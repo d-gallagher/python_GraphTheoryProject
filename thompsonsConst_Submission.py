@@ -3,11 +3,22 @@
 # www.oxfordmathcenter.com/drupal7/node/628
 
 def shunt(infix):
+    """
+    Takes a regular expression from 'infix' notation to 'postfix' notation.
+    Infix examples:
+        a.b -- an 'a' followed by a 'b'
+        a|b -- an 'a' or a 'b'
+        a*  -- any number of 'a's, includng 0
+    Postfix examples:
+        ab. -- an 'a' followed by a 'b'
+        ab| -- an 'a' or a 'b'
+        a*  -- any number of 'a's, includng 0
+    """
 
     # need to add other operators here + ? and set precedence
     priorityOps = {'*':50, '+':45, '?':45, '.':40, '|':30}
 
-    postFx = "" #string output    
+    postFix = "" #string output    
     stack = "" #stack of chars, operators and parenthesis
 
     #loop through infix string
@@ -19,7 +30,7 @@ def shunt(infix):
             # loop until closing parenthesis is found
             while stack[-1] != '(':
                 # concat next char on stack to string
-                postFx = postFx + stack[-1]
+                postFix = postFix + stack[-1]
                 # pop the char from stack
                 stack = stack[:-1]
             # remove closing parenthesis from the stack
@@ -31,22 +42,22 @@ def shunt(infix):
                 # get the special character from the dict
                 # concatenate the next character on the stack
                 # to the return string
-                postFx = postFx + stack[-1]
+                postFix = postFix + stack[-1]
                 # pop the char from the stack
                 stack = stack[:-1]
 
             stack = stack + c
         else:
             # push any regular chars to return string
-            postFx = postFx + c
+            postFix = postFix + c
 
     while stack:
         # pop the remaining operators from the stack
-        postFx= postFx + stack[-1]
+        postFix= postFix + stack[-1]
 
         stack = stack[:-1]
 
-    return postFx
+    return postFix
 print("shunt test - (a.b)|(c*d)" +" " + shunt("(a.b)|(c*d)"))
 #print(shunt("(a.b)|(c*d)"))
 
@@ -145,6 +156,28 @@ def compile(pofix):
             new_nfa = nfa(initial1, accept1)
             nfaStack.append(new_nfa)
         
+        # Operator - 1 or 0
+        elif c == "?":
+            # pop a single nfa from the stack
+            nfa1 = nfaStack.pop()
+
+            # create new initial and accept state
+            initial1 = state()
+            accept1 = state()
+
+            # point new initial state edge1 to popped nfa's initial state 
+            initial1.edge1 = nfa1.initial
+
+            # point new initial states edge2 to new accept state
+            initial1.edge2 = accept
+
+            # point popped nfa's accept state edge1 to new accept state 
+            nfa1.accept.edge1 = accept1
+
+            # push new nfa to stack
+            new_nfa = nfa(initial1, accept1)
+            nfaStack.append(new_nfa)
+        
 
         # Handle all non special characters
         else:
@@ -218,7 +251,7 @@ def match(infix, string):
 
 print(match("a.b.c", "abc"))
 print(match("a+b.c", "abc"))
-#print(match("a?b.c", "abc"))
+print(match("a?b.c", "abc"))
 print(match("a*b.c", "abc"))
 print(match("a|b.c", "abc"))
 
