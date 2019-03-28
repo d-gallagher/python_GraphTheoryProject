@@ -5,34 +5,53 @@
 def shunt(infix):
 
     # need to add other operators here + ? and set precedence
-    priorityOps = {'*':50, '.':40, '|':30}
+    priorityOps = {'*':50, '+':45, '?':45, '.':40, '|':30}
 
-    postFx = ""
-    stack = ""
+    postFx = "" #string output    
+    stack = "" #stack of chars, operators and parenthesis
 
+    #loop through infix string
     for c in infix:
         if c == '(':
+            # if opening parenthesis, push to stack
             stack = stack + c
         elif c == ')':
+            # loop until closing parenthesis is found
             while stack[-1] != '(':
-                postFx, stack = postFx + stack[-1], stack[:-1]
+                # concat next char on stack to string
+                postFx = postFx + stack[-1]
+                # pop the char from stack
+                stack = stack[:-1]
+            # remove closing parenthesis from the stack
             stack = stack[:-1]
+
         elif c in priorityOps:
+            # if theres an operator, push to stack after popping lower or equal precedence operators from top of stack output
             while stack and priorityOps.get(c, 0) <= priorityOps.get(stack[-1], 0):
-                postFx, stack = postFx + stack[-1], stack[:-1]
+                # get the special character from the dict
+                # concatenate the next character on the stack
+                # to the return string
+                postFx = postFx + stack[-1]
+                # pop the char from the stack
+                stack = stack[:-1]
+
             stack = stack + c
         else:
-            postFx = stack + c
+            # push any regular chars to return string
+            postFx = postFx + c
 
     while stack:
-        postFx, stack = postFx + stack[-1], stack[:-1]
+        # pop the remaining operators from the stack
+        postFx= postFx + stack[-1]
+
+        stack = stack[:-1]
 
     return postFx
+print("shunt test - (a.b)|(c*d)" +" " + shunt("(a.b)|(c*d)"))
+#print(shunt("(a.b)|(c*d)"))
 
-print(shunt("(a.b)|(c*d)"))
 
-
-# Thompsons Construction
+# Thompsons Construction 
 # https://swtch.com/~rsc/regexp/regexp1.html
 
 # State w/Two arrows, labeled by the label.
@@ -57,7 +76,7 @@ def compile(pofix):
     nfaStack = []
 
     for c in pofix:
-        
+        # Operator - Concatenate
         if c == '.':
             # Pop two nfa's off the stack
             nfa2 = nfaStack.pop()
@@ -69,7 +88,8 @@ def compile(pofix):
             # Push to the stack
             new_nfa = nfa(nfa1.initial, nfa2.accept)
             nfaStack.append(new_nfa)
-
+        
+        # Operator - OR 
         elif c == '|':
             #Pop two nfa's off the stack
             nfa2 = nfaStack.pop()
@@ -91,6 +111,7 @@ def compile(pofix):
             new_nfa = nfa(nfa1.initial, nfa2.accept)
             nfaStack.append(new_nfa)
 
+        # Operator - 0 or more
         elif c == '*':
             #pop single nfa from the stack
             nfa1 = nfaStack.pop()
@@ -99,13 +120,33 @@ def compile(pofix):
             accept1 = state()
             #join new initial state to nfa's initial state and the new accept state
             initial1.edge1 = nfa.initial
-            initial1.edge2 = accept
+            initial1.edge2 = accept1
             #join the old accept state to the new accept, and nfa1's initial state
             nfa1.accept.edge1 = nfa1.initial
-            nfa1.accept.edge2 = accept
+            nfa1.accept.edge2 = accept1
             #push new nfa to stack
-            new_nfa = nfa(nfa1.initial, nfa2.accept)
+            new_nfa = nfa(initial1, accept1)
             nfaStack.append(new_nfa)
+        
+        # Operator - 1 or more
+        elif c == '+':
+            #pop single nfa from the stack
+            nfa1 = nfaStack.pop()
+            #create new init and accept state
+            initial1 = state()
+            accept1 = state()
+            #join new initial state to nfa's initial state and the new accept state
+            initial1.edge1 = nfa.initial
+            
+            #join the old accept state to the new accept, and nfa1's initial state
+            nfa1.accept.edge1 = nfa1.initial
+            nfa1.accept.edge2 = accept1
+            #push new nfa to stack
+            new_nfa = nfa(initial1, accept1)
+            nfaStack.append(new_nfa)
+        
+
+        # Handle all non special characters
         else:
             #new states for accept and initial
             accept = state()
@@ -116,23 +157,28 @@ def compile(pofix):
             initial.edge1 = accept
 
             #new instance of nfa class - send initial and accept using constructor
-            new_nfa = nfa(nfa1.initial, nfa2.accept)
+            new_nfa = nfa(initial, accept)
             nfaStack.append(new_nfa)
 
     return nfaStack.pop()
 
-#Returns the state or set of states which can be reached from a state by following 'E' arrows
+
 def followes(state):
+    """
+    Returns the state or set of states which can be reached from a state by following 'E' arrows.
+    """
 # Create a new set with only a state as a member
     states = set()
-    set.add(state)
+    states.add(state)
 
     #Check if state has arrows labelled e leading out of it
-    if state.label is none:
-        #if there's edge 1 - follow
-        states |= followes(state.edge1)
-        #if edge 2 - follow
-        states |= followes(state.edge2)
+    if state.label is None:
+        #if there's an edge 1 - follow
+        if state.edge1 is not None:
+            states |= followes(state.edge1)
+        #if there's an edge 2 - follow
+        if state.edge2 is not None:
+            states |= followes(state.edge2)
     
     # return the set of states
     return states
@@ -154,7 +200,7 @@ def match(infix, string):
     future = set()
 
     #Add initial state to the present set
-    present |- followes(nfa.initial)
+    present |= followes(nfa.initial)
 
     #loop through each char in string s
     for s in string:
@@ -169,5 +215,11 @@ def match(infix, string):
     
     #check if accept state is in the current set of states
     return (nfa.accept in present)
+
+print(match("a.b.c", "abc"))
+print(match("a+b.c", "abc"))
+#print(match("a?b.c", "abc"))
+print(match("a*b.c", "abc"))
+print(match("a|b.c", "abc"))
 
 
