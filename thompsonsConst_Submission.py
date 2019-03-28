@@ -119,7 +119,7 @@ def compile(pofix):
             nfa2.accept.edge1 = accept
 
             #push new nfa to stack
-            new_nfa = nfa(nfa1.initial, nfa2.accept)
+            new_nfa = nfa(initial, accept)
             nfaStack.append(new_nfa)
 
         # Operator - 0 or more
@@ -127,16 +127,16 @@ def compile(pofix):
             #pop single nfa from the stack
             nfa1 = nfaStack.pop()
             #create new init and accept state
-            initial1 = state()
-            accept1 = state()
+            initial = state()
+            accept = state()
             #join new initial state to nfa's initial state and the new accept state
-            initial1.edge1 = nfa.initial
-            initial1.edge2 = accept1
+            initial.edge1 = nfa1.initial
+            initial.edge2 = accept
             #join the old accept state to the new accept, and nfa1's initial state
             nfa1.accept.edge1 = nfa1.initial
-            nfa1.accept.edge2 = accept1
+            nfa1.accept.edge2 = accept
             #push new nfa to stack
-            new_nfa = nfa(initial1, accept1)
+            new_nfa = nfa(initial, accept)
             nfaStack.append(new_nfa)
         
         # Operator - 1 or more
@@ -144,16 +144,16 @@ def compile(pofix):
             #pop single nfa from the stack
             nfa1 = nfaStack.pop()
             #create new init and accept state
-            initial1 = state()
-            accept1 = state()
+            initial = state()
+            accept = state()
             #join new initial state to nfa's initial state and the new accept state
-            initial1.edge1 = nfa.initial
+            initial.edge1 = nfa1.initial
             
             #join the old accept state to the new accept, and nfa1's initial state
             nfa1.accept.edge1 = nfa1.initial
-            nfa1.accept.edge2 = accept1
+            nfa1.accept.edge2 = accept
             #push new nfa to stack
-            new_nfa = nfa(initial1, accept1)
+            new_nfa = nfa(initial, accept)
             nfaStack.append(new_nfa)
         
         # Operator - 1 or 0
@@ -162,20 +162,20 @@ def compile(pofix):
             nfa1 = nfaStack.pop()
 
             # create new initial and accept state
-            initial1 = state()
-            accept1 = state()
+            initial = state()
+            accept = state()
 
             # point new initial state edge1 to popped nfa's initial state 
-            initial1.edge1 = nfa1.initial
+            initial.edge1 = nfa1.initial
 
             # point new initial states edge2 to new accept state
-            initial1.edge2 = accept
+            initial.edge2 = accept
 
             # point popped nfa's accept state edge1 to new accept state 
-            nfa1.accept.edge1 = accept1
+            nfa1.accept.edge1 = accept
 
             # push new nfa to stack
-            new_nfa = nfa(initial1, accept1)
+            new_nfa = nfa(initial, accept)
             nfaStack.append(new_nfa)
         
 
@@ -249,10 +249,13 @@ def match(infix, string):
     #check if accept state is in the current set of states
     return (nfa.accept in present)
 
-print(match("a.b.c", "abc"))
-print(match("a+b.c", "abc"))
-print(match("a?b.c", "abc"))
-print(match("a*b.c", "abc"))
-print(match("a|b.c", "abc"))
+# Testing the program with infox notation and strings
+# , "a.b.c+", "a.b.c?"
+infixes = ["a.b.c*", "a.(b|d).c*", "(a.(b|d))*", "a.(b.b)*.c", "a.b.c+", "a.b.c?"]
+strings = ["", "abc", "abbc", "abcc", "abad", "abbbc"]
+
+for i in infixes:
+    for s in strings:
+        print(match(i, s), i, s)
 
 
