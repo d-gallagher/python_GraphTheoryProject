@@ -27,11 +27,11 @@ The current working project is comprised of 4 concise functions, which are comme
 * The Shunting Yard Algorithm is used to parse through an infix notation and return the string in postfix notation. For more information on this see: 
 * > https://en.wikipedia.org/wiki/Shunting-yard_algorithm
 * Infix examples:
-* >  a.b -- an 'a' followed by a 'b'
-* >  a|b -- an 'a' or a 'b'
-* >  a*  -- any number of 'a's, includng 0
+* >  a.b  -- an 'a' followed by a 'b'
+* >  a|b  -- an 'a' or a 'b'
+* >  a*   -- any number of 'a's, includng 0
 * >  a+b  -- one 'a' or more 
-* >  a?  -- zero or one 'a's
+* >  a?   -- zero or one 'a's
 * Postfix examples:
 * >  ab. -- an 'a' followed by a 'b'
 * >  ab| -- an 'a' or a 'b'
@@ -51,5 +51,9 @@ The current working project is comprised of 4 concise functions, which are comme
 * Read as "Follow E's ".., this function builds a set of states from a given NFA which can be reached by following any 'E' arrow in the NFA.
 
 #### Match Function
-
+* Match compiles the infix regular expression to postfix and creates an NFA from it using the Compile Function.
+* We then create two empty sets of states both present and future states will be located here.
+* The Present set is comprised of any state we land in after following e-arrows from the initial state, using the Followes Function.
+* We can now take a string and loop through it to find all states we can access from that character in the string.
+* Repeat for each character in the string. Finally ending up with the string being accepted or rejected and returning true or false.
     
