@@ -9,11 +9,22 @@ picsize = 250,250
 
 infixes = ["a.b.c*", "a.(b|d).c*", "(a.(b|d))*", "a.(b.b)*.c", "a.b.c+", "a.b.c?"]
 strings = ["", "abc", "abbc", "abcc", "abad", "abbbc"]
+regexOut = []
+userInfixes = []
+userStrings = []
 
-def runRegex():
-    for i in infixes:
-        for s in strings:
+def runRegex(l1, l2):
+    for i in l1:
+        for s in l2:
             print(match(i, s), i, s)
+            regexOut.append(print(match(i, s), i, s))
+
+# def addUserInfixandString():
+#     uInfix = infixEntry.get()
+#     uString = stringEntry.get()
+#     userInfixes.append(uInfix)
+#     userStrings.append(uString)
+#     print(uInfix, uString)
 
 class Root(Tk):
     def __init__(self):
@@ -21,11 +32,6 @@ class Root(Tk):
         self.geometry('800x500')
         self.title('Regex Matching with Thompsons Construction')
 
-        def check_expression():
-            #Your code that checks the expression
-            #varContent = inputentry.get() # get what's written in the inputentry entry widget
-            #self.outputtext.delete('0', END) # clear the outputtext text widget
-            self.outputtext.insert(runRegex.__str__)
 
         self.notebook = Notebook(self)
         
@@ -49,17 +55,37 @@ class Root(Tk):
         # self.string_label.pack()
 
         self.regex_entryLabel = Label(regex_tab, text="infix", bg="#585858", fg="#ec7357").grid(row=2, column=0)
-        self.regex_entry = Entry(regex_tab, bg="#fdd692", fg="black").grid(row=2)
-        self.string_entry = Entry(regex_tab, bg="#fdd692", fg="black").grid(row=3)
-        self.add_regex_and_string = Button(regex_tab, text="Add Regex and String", command=check_expression).grid(row=4)
+        self.infix_entryBox = Entry(regex_tab, bg="#fdd692", fg="black").grid(row=2)
+        self.string_entryBox = Entry(regex_tab, bg="#fdd692", fg="black").grid(row=3)
+        infixEntry = StringVar()
+        stringEntry = StringVar()
+
+        def addUserInfixandString():
+            uInfix = infixEntry.get()
+            uString = stringEntry.get()
+            userInfixes.append(uInfix)
+            userStrings.append(uString)
+            print(uInfix, uString)
+            #print(match(uInfix, uString), uInfix, uString)
+
+        self.add_regex_and_string = Button(regex_tab, text="Add Regex and String", command=addUserInfixandString).grid(row=4)
         #self.add_regex_and_string.pack(fill=X)
 
-        self.button = Button(regex_tab, text="Run Regex", command=runRegex).grid(row=5)
+        # self.button = Button(regex_tab, text="Run Regex", command=runRegex).grid(row=5)
         #self.button.pack( fill=X)
 
         #output regex data
         self.outputtext = Text(regex_tab).grid(column=1, row=5)
         #outputtext.grid(column=1, row=5)
+        def check_expression():
+            #Your code that checks the expression
+            #self.outputtext.delete('0', END) # clear the outputtext text widget           
+            for s in regexOut:
+                varContent = "" + regexOut.pop() # get what's written in the inputentry entry widget  
+                runRegex(infixes, strings)              
+                self.outputtext.insert(varContent)
+
+        self.button = Button(regex_tab, text="Run Regex", command=check_expression).grid(row=5)
 
         #add tabs to notebook window
         self.notebook.add(about_tab, text="About")
@@ -68,4 +94,4 @@ class Root(Tk):
        
 if __name__ == '__main__' :
     root = Root()
-root.mainloop()
+    root.mainloop()
