@@ -56,4 +56,6 @@ The current working project is comprised of 4 concise functions, which are comme
 * The Present set is comprised of any state we land in after following e-arrows from the initial state, using the Followes Function.
 * We can now take a string and loop through it to find all states we can access from that character in the string.
 * Repeat for each character in the string. Finally ending up with the string being accepted or rejected and returning true or false.
-    
+
+### Beta Branch
+GUI branch is in development but is not working yet. Some button functions are outputting to console but there's no out put in the GUI so far. Needs more fleshing out.
