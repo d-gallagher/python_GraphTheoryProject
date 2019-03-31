@@ -9,10 +9,14 @@ def shunt(infix):
         a.b -- an 'a' followed by a 'b'
         a|b -- an 'a' or a 'b'
         a*  -- any number of 'a's, includng 0
+        a+b -- one 'a' or more
+        a?  -- zero or one 'a's
     Postfix examples:
         ab. -- an 'a' followed by a 'b'
         ab| -- an 'a' or a 'b'
         a*  -- any number of 'a's, includng 0
+        a+b -- one 'a' or more
+        a?  -- zero or one 'a's
     """
 
     # need to add other operators here + ? and set precedence
